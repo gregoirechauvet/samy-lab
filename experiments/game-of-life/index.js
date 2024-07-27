@@ -16,9 +16,9 @@ class GameOfLifeCore {
   grid;
 
   /**
-   * @param width {number}
-   * @param height {number}
-   * @param initialFillRatio {number}
+   * @param {number} width
+   * @param {number} height
+   * @param {number} initialFillRatio
    */
   constructor(width, height, initialFillRatio) {
     this.#width = width;
@@ -72,8 +72,8 @@ class GameOfLifeCore {
   }
 
   /**
-   * @param dividend {number}
-   * @param divisor {number}
+   * @param {number} dividend
+   * @param {number} divisor
    * @return {number}
    */
   modulo(dividend, divisor) {
@@ -93,17 +93,17 @@ class GameOfLife extends HTMLCanvasElement {
     const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
 
     const rawInitialFillRatio = this.getAttribute("initial-fill-ratio");
-    const initialFillRatio = rawInitialFillRatio !== null ? Number(rawInitialFillRatio) : 0.3;
+    const initialFillRatio = rawInitialFillRatio !== null ? Number(rawInitialFillRatio) : 0.3; // TODO: check user inputs
 
+    const dpi = window.devicePixelRatio;
     const widthPx = this.clientWidth;
     const heightPx = this.clientHeight;
 
     const width = Math.floor(widthPx / cellSize);
     const height = Math.floor(heightPx / cellSize);
-    const dpi = window.devicePixelRatio;
 
-    this.width = widthPx;
-    this.height = heightPx;
+    this.width = widthPx * dpi;
+    this.height = heightPx * dpi;
 
     console.debug("Parameters", { widthPx, heightPx, width, height, dpi, cellSize });
 
@@ -111,8 +111,8 @@ class GameOfLife extends HTMLCanvasElement {
     const draw = this.initDraw(gameOfLife, widthPx, heightPx, cellSize, dpi);
 
     const loop = () => {
-      draw();
       gameOfLife.tick();
+      draw();
       this.#animationRef = window.requestAnimationFrame(loop);
     };
 
@@ -126,15 +126,14 @@ class GameOfLife extends HTMLCanvasElement {
     if (this.#animationRef !== null) {
       cancelAnimationFrame(this.#animationRef);
     }
-    console.log("Custom element removed from page.");
   }
 
   /**
-   * @param gameOfLife {GameOfLifeCore}
-   * @param width {number}
-   * @param height {number}
-   * @param cellSize {number}
-   * @param dpi {number}
+   * @param {GameOfLifeCore} gameOfLife
+   * @param {number} width
+   * @param {number} height
+   * @param {number} cellSize
+   * @param {number} dpi
    * @return {() => void}
    */
   initDraw(gameOfLife, width, height, cellSize, dpi) {
@@ -146,7 +145,7 @@ class GameOfLife extends HTMLCanvasElement {
     context.scale(dpi, dpi);
     context.clearRect(0, 0, width, height);
 
-    return () => {
+    const draw = () => {
       gameOfLife.grid.forEach((row, rowIndex) => {
         row.forEach((cell, cellIndex) => {
           if (cell === CellState.Alive) {
@@ -157,6 +156,9 @@ class GameOfLife extends HTMLCanvasElement {
         });
       });
     };
+
+    draw();
+    return draw;
   }
 }
 
