@@ -1,3 +1,7 @@
+* {
+  font-family: monospace;
+}
+
 h1 {
   margin: 0;
 }
@@ -37,4 +41,9 @@ h1 {
 
 .transition-name {
   view-transition-name: canvas;
+}
+
+fieldset {
+  border-style: solid;
+  border-radius: 4px;
 }
