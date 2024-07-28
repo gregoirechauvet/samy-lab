@@ -139,17 +139,22 @@ function initDraw(canvas, cellSize) {
   };
 }
 
+/** @type {number | null} */
+let requestId = null;
+
 /**
  * @param event {MessageEvent<{canvas: OffscreenCanvas; cellSize:number; initialFillRatio: number}>}
  */
 onmessage = (event) => {
+  if (requestId !== null) {
+    cancelAnimationFrame(requestId);
+  }
+
   const { canvas, cellSize, initialFillRatio } = event.data;
 
   const core = new BrianBrainCore(canvas.width, canvas.height, initialFillRatio);
   const draw = initDraw(canvas, cellSize);
 
-  /** @type {number} */
-  let requestId;
   let previousTime = 0;
 
   /**

@@ -45,16 +45,22 @@ class BrianBrain extends CanvasComponent {
   /**
    * @return {Promise<void>}
    */
-  async connectedCallback() {
-    const cellSize = Math.floor(this.cellSize * devicePixelRatio);
-    const initialFillRatio = this.initialFillRatio;
+  connectedCallback() {
+    const init = async () => {
+      const cellSize = Math.floor(this.cellSize * devicePixelRatio);
+      const initialFillRatio = this.initialFillRatio;
 
-    const { width, height } = await this.getCanvasBox();
-    this.width = width;
-    this.height = height;
+      const { width, height } = await this.getCanvasBox();
+      this.width = width;
+      this.height = height;
 
-    const offscreen = this.transferControlToOffscreen();
-    this.#worker.postMessage({ canvas: offscreen, cellSize, initialFillRatio }, [offscreen]);
+      const offscreen = this.transferControlToOffscreen();
+      this.#worker.postMessage({ canvas: offscreen, cellSize, initialFillRatio }, [offscreen]);
+    };
+
+    this.addValueListener("initial-fill-ratio", init);
+    this.addValueListener("cell-size", init);
+    init();
   }
 }
 
