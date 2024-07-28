@@ -1,0 +1,71 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Samy's lab</title>
+  <link rel="icon" href="/web/images/icon-192x192.png" />
+  <link rel="stylesheet" href="/web/main.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" />
+
+  <script type="module" src="/experiments/image-transformation/index.js"></script>
+  <script>
+    window.addEventListener("load", () => {
+      const gameOfLife = document.querySelector("canvas");
+      document.querySelector("#play").addEventListener("click", () => {});
+      document.querySelector("#pause").addEventListener("click", () => {});
+
+      document.querySelector("form").addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const data = new FormData(event.target);
+        data.entries().forEach(([key, value]) => {
+          gameOfLife.setAttribute(key, value);
+        });
+      });
+    });
+  </script>
+</head>
+
+<h1>Image transformation</h1>
+<a href="/" class="back-link">&lt; Go back</a>
+
+<canvas is="image-transformation" class="transition-name" width="300" height="150"></canvas>
+
+<form>
+  <button id="play" type="button">Play</button>
+  <button id="pause" type="button">Pause</button>
+
+  <!--  <fieldset class="inputs">-->
+  <!--    <legend>Options</legend>-->
+  <!--    <label for="width">Width (px)</label>-->
+  <!--    <input id="width" name="width" type="number" value="300" />-->
+
+  <!--    <label for="height">Height (px)</label>-->
+  <!--    <input id="height" name="height" type="number" value="150" />-->
+
+  <!--    <label for="cell-size">Cell size (px)</label>-->
+  <!--    <input id="cell-size" name="cell-size" type="number" value="3" />-->
+
+  <!--    <label for="iteration-per-tick">Iterations per tick</label>-->
+  <!--    <input id="iteration-per-tick" name="iteration-per-tick" type="number" value="20" />-->
+
+  <!--    <label for="preset">Preset</label>-->
+  <!--    <select name="preset" id="preset">-->
+  <!--      <option value="3-colors-fast-highway">3-colors-fast-highway</option>-->
+  <!--      <option value="5-colors-filler">5-colors-filler</option>-->
+  <!--      <option value="7-colors-expanding">7-colors-expanding</option>-->
+  <!--      <option value="9-colors-bouncing-ant">9-colors-bouncing-ant</option>-->
+  <!--      <option value="10-colors-fast-highway">10-colors-fast-highway</option>-->
+  <!--      <option value="10-colors-large-highway">10-colors-large-highway</option>-->
+  <!--      <option value="11-colors-expanding-snail" selected>11-colors-expanding-snail</option>-->
+  <!--      <option value="12-colors-zigzag-highway">12-colors-zigzag-highway</option>-->
+  <!--      <option value="12-colors-expanding-pyramid">12-colors-expanding-pyramid</option>-->
+  <!--      <option value="12-colors-expanding-ship">12-colors-expanding-ship</option>-->
+  <!--    </select>-->
+
+  <!--    <div class="actions">-->
+  <!--      <input type="submit" value="Reset" />-->
+  <!--    </div>-->
+  <!--  </fieldset>-->
+</form>
