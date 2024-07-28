@@ -7,19 +7,25 @@ export class CanvasComponent extends HTMLElement {
   canvas;
 
   constructor() {
-    const root = super();
+    super();
+
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(":host { display: block; }");
+
     this.canvas = document.createElement("canvas");
 
-    root.attachShadow({ mode: "open" }).append(this.canvas);
+    const shadow = this.attachShadow({ mode: "open" });
+    shadow.adoptedStyleSheets = [sheet];
+    shadow.append(this.canvas);
   }
 
   /**
    * @return {void}
    */
-  // connectedCallback() {
-  //   const shadow = this.attachShadow({ mode: "open" });
-  //   shadow.append(this.canvas);
-  // }
+  connectedCallback() {
+    //   const shadow = this.attachShadow({ mode: "open" });
+    //   shadow.append(this.canvas);
+  }
 
   /**
    * @param {() => void} callback

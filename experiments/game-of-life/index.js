@@ -85,6 +85,38 @@ class GameOfLife extends CanvasComponent {
   /** @type {string[]} */
   static observedAttributes = ["height", "width", "cell-size", "initial-fill-ratio"];
 
+  /**
+   * @return {number}
+   */
+  get width() {
+    const rawHeight = this.getAttribute("width");
+    return Number(rawHeight);
+  }
+
+  /**
+   * @param {number} value
+   * @return {void}
+   */
+  set width(value) {
+    this.setAttribute("width", value.toString());
+  }
+
+  /**
+   * @return {number}
+   */
+  get height() {
+    const rawHeight = this.getAttribute("height");
+    return Number(rawHeight);
+  }
+
+  /**
+   * @param {number} value
+   * @return {void}
+   */
+  set height(value) {
+    this.setAttribute("height", value.toString());
+  }
+
   constructor() {
     super();
   }
@@ -94,7 +126,6 @@ class GameOfLife extends CanvasComponent {
    */
   connectedCallback() {
     super.connectedCallback();
-    this.style.display = "block";
 
     /** @type {GameOfLifeCore | null} */
     let gameOfLife = null;
@@ -103,23 +134,23 @@ class GameOfLife extends CanvasComponent {
 
     const init = () => {
       console.log("init");
-      const resizeObserver = new ResizeObserver(([canvas]) => {
-        resizeObserver.unobserve(this);
+      // const resizeObserver = new ResizeObserver(([canvas]) => {
+      //   resizeObserver.unobserve(this);
+      //
+      //   const [boxSize] = canvas.devicePixelContentBoxSize;
+      //
+      //   const width = boxSize.inlineSize;
+      //   const height = boxSize.blockSize;
+      //
+      //   this.canvas.width = width;
+      //   this.canvas.height = height;
+      //
+      //   const initState = this.initGameOfLife(width, height);
+      //   gameOfLife = initState.gameOfLife;
+      //   draw = initState.draw;
+      // });
 
-        const [boxSize] = canvas.devicePixelContentBoxSize;
-
-        const width = boxSize.inlineSize;
-        const height = boxSize.blockSize;
-
-        this.canvas.width = width;
-        this.canvas.height = height;
-
-        const initState = this.initGameOfLife(width, height);
-        gameOfLife = initState.gameOfLife;
-        draw = initState.draw;
-      });
-
-      resizeObserver.observe(this.canvas, { box: "device-pixel-content-box" });
+      // resizeObserver.observe(this.canvas, { box: "device-pixel-content-box" });
     };
 
     this.addValueListener("height", init);
