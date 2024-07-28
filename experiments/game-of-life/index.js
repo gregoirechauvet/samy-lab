@@ -140,7 +140,10 @@ class GameOfLife extends CanvasComponent {
    */
   initGameOfLife(widthPx, heightPx) {
     const rawCellSize = this.getAttribute("cell-size");
-    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+    const parsedCellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+
+    const dpr = window.devicePixelRatio;
+    const cellSize = Math.floor(parsedCellSize * dpr);
 
     const rawInitialFillRatio = this.getAttribute("initial-fill-ratio");
     const initialFillRatio = rawInitialFillRatio !== null ? Number(rawInitialFillRatio) : 0.3; // TODO: check user inputs

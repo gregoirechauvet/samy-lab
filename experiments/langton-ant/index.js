@@ -303,7 +303,10 @@ class LangtonAnt extends HTMLCanvasElement {
    */
   initLangtonAnt(widthPx, heightPx) {
     const rawCellSize = this.getAttribute("cell-size");
-    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+    const parsedCellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+
+    const dpr = window.devicePixelRatio;
+    const cellSize = Math.floor(parsedCellSize * dpr);
 
     const rulePreset = this.getAttribute("preset") ?? "classic";
     const rules = presets[rulePreset] ?? presets["classic"];
