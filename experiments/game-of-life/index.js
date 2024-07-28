@@ -95,7 +95,6 @@ class GameOfLife extends CanvasComponent {
     let draw = null;
 
     const init = () => {
-      console.log("init");
       const resizeObserver = new ResizeObserver(([canvas]) => {
         resizeObserver.unobserve(this);
 
@@ -126,10 +125,10 @@ class GameOfLife extends CanvasComponent {
     const loop = () => {
       gameOfLife?.tick();
       draw?.();
-      animationFrameRequest = window.requestAnimationFrame(loop);
+      animationFrameRequest = requestAnimationFrame(loop);
     };
 
-    animationFrameRequest = window.requestAnimationFrame(loop);
+    animationFrameRequest = requestAnimationFrame(loop);
     this.onDisconnect(() => cancelAnimationFrame(animationFrameRequest));
   }
 
