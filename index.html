@@ -3,9 +3,22 @@
   <meta charset="utf-8" />
   <title>Samy's lab</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="./experiments/game-of-life/index.js"></script>
-  <script src="./experiments/langton-ant/index.js"></script>
+  <link rel="stylesheet" href="/web/main.css" />
+  <script type="module" src="/experiments/game-of-life/index.js"></script>
+  <script type="module" src="/experiments/langton-ant/index.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+    rel="stylesheet"
+  />
 </head>
 
-<canvas is="game-of-life" cell-size="7" initial-fill-ratio="0.3"></canvas>
-<canvas is="langton-ant" cell-size="7" iteration-per-tick="100" preset="12-colors-expanding-ship"></canvas>
+<h1>Samy's lab</h1>
+
+<div class="experiments">
+  <a href="/web/game-of-life.html">
+    <canvas is="game-of-life" cell-size="3" initial-fill-ratio="0.3"></canvas>
+  </a>
+  <a href="/web/langton-ant.html">
+    <canvas is="langton-ant" cell-size="3" iteration-per-tick="100" preset="12-colors-expanding-ship"></canvas>
+  </a>
+</div>

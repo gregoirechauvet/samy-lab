@@ -84,48 +84,67 @@ class GameOfLifeCore {
 class GameOfLife extends HTMLCanvasElement {
   /** @type {number | null} */
   #animationRef = null;
+  /** @type {ResizeObserver | null} */
+  #resizeObserver = null;
 
   /**
    * @return {void}
    */
   connectedCallback() {
-    const rawCellSize = this.getAttribute("cell-size");
-    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+    this.#resizeObserver = new ResizeObserver(([canvas]) => {
+      this.#resizeObserver?.unobserve(this);
 
-    const rawInitialFillRatio = this.getAttribute("initial-fill-ratio");
-    const initialFillRatio = rawInitialFillRatio !== null ? Number(rawInitialFillRatio) : 0.3; // TODO: check user inputs
+      const [boxSize] = canvas.devicePixelContentBoxSize;
 
-    const dpi = window.devicePixelRatio;
-    const widthPx = this.clientWidth;
-    const heightPx = this.clientHeight;
+      const width = boxSize.inlineSize;
+      const height = boxSize.blockSize;
 
-    const width = Math.floor(widthPx / cellSize);
-    const height = Math.floor(heightPx / cellSize);
+      this.width = width;
+      this.height = height;
 
-    this.width = widthPx * dpi;
-    this.height = heightPx * dpi;
+      const { gameOfLife, draw } = this.initGameOfLife(width, height);
 
-    console.debug("Parameters", { widthPx, heightPx, width, height, dpi, cellSize });
+      const loop = () => {
+        gameOfLife.tick();
+        draw();
+        this.#animationRef = window.requestAnimationFrame(loop);
+      };
 
-    const gameOfLife = new GameOfLifeCore(width, height, initialFillRatio);
-    const draw = this.initDraw(gameOfLife, widthPx, heightPx, cellSize, dpi);
-
-    const loop = () => {
-      gameOfLife.tick();
-      draw();
       this.#animationRef = window.requestAnimationFrame(loop);
-    };
+    });
 
-    this.#animationRef = window.requestAnimationFrame(loop);
+    this.#resizeObserver.observe(this, { box: "device-pixel-content-box" });
   }
 
   /**
    * @return {void}
    */
   disconnectedCallback() {
+    this.#resizeObserver?.disconnect();
     if (this.#animationRef !== null) {
       cancelAnimationFrame(this.#animationRef);
     }
+  }
+
+  /**
+   * @param {number} widthPx
+   * @param {number} heightPx
+   * @return {{gameOfLife: GameOfLifeCore, draw: () => void}}
+   */
+  initGameOfLife(widthPx, heightPx) {
+    const rawCellSize = this.getAttribute("cell-size");
+    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+
+    const rawInitialFillRatio = this.getAttribute("initial-fill-ratio");
+    const initialFillRatio = rawInitialFillRatio !== null ? Number(rawInitialFillRatio) : 0.3; // TODO: check user inputs
+
+    const width = Math.floor(widthPx / cellSize);
+    const height = Math.floor(heightPx / cellSize);
+
+    const gameOfLife = new GameOfLifeCore(width, height, initialFillRatio);
+    const draw = this.initDraw(gameOfLife, widthPx, heightPx, cellSize);
+
+    return { gameOfLife, draw };
   }
 
   /**
@@ -133,16 +152,15 @@ class GameOfLife extends HTMLCanvasElement {
    * @param {number} width
    * @param {number} height
    * @param {number} cellSize
-   * @param {number} dpi
    * @return {() => void}
    */
-  initDraw(gameOfLife, width, height, cellSize, dpi) {
+  initDraw(gameOfLife, width, height, cellSize) {
     const context = this.getContext("2d");
     if (context === null) {
       throw new Error("cannot init context for rendering");
     }
 
-    context.scale(dpi, dpi);
+    // context.scale(dpi, dpi);
     context.clearRect(0, 0, width, height);
 
     const draw = () => {

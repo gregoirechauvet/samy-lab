@@ -254,42 +254,72 @@ class LangtonAntCore {
 class LangtonAnt extends HTMLCanvasElement {
   /** @type {number | null} */
   #animationRef = null;
+  /** @type {ResizeObserver | null} */
+  #resizeObserver = null;
 
+  /**
+   * @return {void}
+   */
   connectedCallback() {
-    const rawCellSize = this.getAttribute("cell-size");
-    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
-
     const rawIterationPerTick = this.getAttribute("iteration-per-tick");
     const iterationPerTick = rawIterationPerTick !== null ? Number(rawIterationPerTick) : 20; // TODO: check user inputs
 
+    this.#resizeObserver = new ResizeObserver(([canvas]) => {
+      this.#resizeObserver?.unobserve(this);
+
+      const [boxSize] = canvas.devicePixelContentBoxSize;
+
+      const width = boxSize.inlineSize;
+      const height = boxSize.blockSize;
+
+      this.width = width;
+      this.height = height;
+
+      const { langtonAnt, draw } = this.initLangtonAnt(width, height);
+
+      const loop = () => {
+        for (let i = 0; i < iterationPerTick; i++) {
+          langtonAnt.tick();
+        }
+        draw();
+        this.#animationRef = window.requestAnimationFrame(loop);
+      };
+
+      this.#animationRef = window.requestAnimationFrame(loop);
+    });
+
+    this.#resizeObserver.observe(this, { box: "device-pixel-content-box" });
+  }
+
+  /**
+   * @return {void}
+   */
+  disconnectedCallback() {
+    this.#resizeObserver?.disconnect();
+    if (this.#animationRef !== null) {
+      cancelAnimationFrame(this.#animationRef);
+    }
+  }
+
+  /**
+   * @param {number} widthPx
+   * @param {number} heightPx
+   * @return {{langtonAnt: LangtonAntCore, draw: () => void}}
+   */
+  initLangtonAnt(widthPx, heightPx) {
+    const rawCellSize = this.getAttribute("cell-size");
+    const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
+
     const rulePreset = this.getAttribute("preset");
     const rules = rulePreset !== null ? presets[rulePreset] ?? defaultRules : defaultRules;
-
-    const dpi = window.devicePixelRatio;
-    const widthPx = this.clientWidth;
-    const heightPx = this.clientHeight;
 
     const width = Math.floor(widthPx / cellSize);
     const height = Math.floor(heightPx / cellSize);
 
     const langtonAnt = new LangtonAntCore(width, height, rules);
-    const draw = this.initDraw(langtonAnt, widthPx, heightPx, cellSize, dpi);
+    const draw = this.initDraw(langtonAnt, widthPx, heightPx, cellSize);
 
-    const loop = () => {
-      for (let i = 0; i < iterationPerTick; i++) {
-        langtonAnt.tick();
-      }
-      draw();
-      this.#animationRef = window.requestAnimationFrame(loop);
-    };
-
-    this.#animationRef = window.requestAnimationFrame(loop);
-  }
-
-  disconnectedCallback() {
-    if (this.#animationRef !== null) {
-      cancelAnimationFrame(this.#animationRef);
-    }
+    return { langtonAnt, draw };
   }
 
   /**
@@ -297,16 +327,14 @@ class LangtonAnt extends HTMLCanvasElement {
    * @param {number} width
    * @param {number} height
    * @param {number} cellSize
-   * @param {number} dpi
    * @return {() => void}
    */
-  initDraw(langtonAnt, width, height, cellSize, dpi) {
+  initDraw(langtonAnt, width, height, cellSize) {
     const context = this.getContext("2d");
     if (context === null) {
       throw new Error("cannot init context for rendering");
     }
 
-    context.scale(dpi, dpi);
     context.clearRect(0, 0, width, height);
 
     const draw = () => {
