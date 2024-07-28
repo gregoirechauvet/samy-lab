@@ -91,7 +91,7 @@ class GameOfLife extends CanvasComponent {
   connectedCallback() {
     /** @type {GameOfLifeCore | null} */
     let gameOfLife = null;
-    /** @type {() => void | null} */
+    /** @type {(() => void) | null} */
     let draw = null;
 
     const init = () => {
@@ -121,6 +121,7 @@ class GameOfLife extends CanvasComponent {
     this.addValueListener("initial-fill-ratio", init);
     init();
 
+    /** @type {number} */
     let animationFrameRequest;
     const loop = () => {
       gameOfLife?.tick();
@@ -130,10 +131,6 @@ class GameOfLife extends CanvasComponent {
 
     animationFrameRequest = window.requestAnimationFrame(loop);
     this.onDisconnect(() => cancelAnimationFrame(animationFrameRequest));
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   /**

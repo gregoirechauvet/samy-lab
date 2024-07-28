@@ -10,15 +10,55 @@
 
   <script type="module" src="/experiments/game-of-life/index.js"></script>
   <script type="module" src="/experiments/langton-ant/index.js"></script>
+
+  <script>
+    function extractExperimentName(url) {
+      return url.pathname.split("/").at(-1).replace(".html", "");
+    }
+
+    window.addEventListener("pageswap", async (e) => {
+      if (!e.viewTransition) {
+        return;
+      }
+
+      const targetUrl = new URL(e.activation.entry.url);
+      const name = extractExperimentName(targetUrl);
+      document.querySelector(`canvas[data-name=${name}]`).style.viewTransitionName = "canvas";
+
+      // Remove view-transition-names after snapshots have been taken (to deal with BFCache)
+      await e.viewTransition.finished;
+      document.querySelector(`canvas[data-name=${name}]`).style.viewTransitionName = "none";
+    });
+
+    window.addEventListener("pagereveal", async (e) => {
+      if (!e.viewTransition) {
+        return;
+      }
+
+      const fromUrl = new URL(navigation.activation.from.url);
+      const name = extractExperimentName(fromUrl);
+      document.querySelector(`canvas[data-name=${name}]`).style.viewTransitionName = "canvas";
+
+      // Remove view-transition-names after snapshots have been taken (to deal with BFCache)
+      await e.viewTransition.ready;
+      document.querySelector(`canvas[data-name=${name}]`).style.viewTransitionName = "none";
+    });
+  </script>
 </head>
 
 <h1>Samy's lab</h1>
 
 <div class="experiments">
   <a href="/web/game-of-life.html">
-    <canvas is="game-of-life" cell-size="3" initial-fill-ratio="0.3"></canvas>
+    <canvas is="game-of-life" data-name="game-of-life" cell-size="3" initial-fill-ratio="0.3"></canvas>
   </a>
   <a href="/web/langton-ant.html">
-    <canvas is="langton-ant" cell-size="3" iteration-per-tick="100" preset="12-colors-expanding-ship"></canvas>
+    <canvas
+      is="langton-ant"
+      data-name="langton-ant"
+      cell-size="3"
+      iteration-per-tick="100"
+      preset="12-colors-expanding-ship"
+    ></canvas>
   </a>
 </div>

@@ -24,18 +24,13 @@ const Action = {
 
 /**
  * @readonly
- * @type {Rule[]}
- */
-const defaultRules = [
-  { action: Action.TurnLeft, color: "#FFFFFF" },
-  { action: Action.TurnRight, color: "#000000" },
-];
-
-/**
- * @readonly
  * @type {{[key: string]: Rule[]}}
  */
 const presets = {
+  classic: [
+    { action: Action.TurnLeft, color: "#FFFFFF" },
+    { action: Action.TurnRight, color: "#000000" },
+  ],
   "3-colors-fast-highway": [
     { action: Action.TurnRight, color: "#FFFFFF" },
     { action: Action.TurnLeft, color: "#FF0000" },
@@ -310,8 +305,8 @@ class LangtonAnt extends HTMLCanvasElement {
     const rawCellSize = this.getAttribute("cell-size");
     const cellSize = rawCellSize !== null ? Number(rawCellSize) : 10; // TODO: check user inputs
 
-    const rulePreset = this.getAttribute("preset");
-    const rules = rulePreset !== null ? presets[rulePreset] ?? defaultRules : defaultRules;
+    const rulePreset = this.getAttribute("preset") ?? "classic";
+    const rules = presets[rulePreset] ?? presets["classic"];
 
     const width = Math.floor(widthPx / cellSize);
     const height = Math.floor(heightPx / cellSize);

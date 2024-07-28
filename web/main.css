@@ -20,8 +20,21 @@ h1 {
 
 .inputs {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: [start] auto auto [end];
   place-items: start;
   gap: 2px 10px;
   margin-top: 10px;
+  width: fit-content;
+
+  .actions {
+    grid-column: start / end;
+  }
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+.transition-name {
+  view-transition-name: canvas;
 }

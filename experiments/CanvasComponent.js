@@ -39,7 +39,7 @@ export class CanvasComponent extends HTMLCanvasElement {
    * @param {string} newValue
    */
   attributeChangedCallback(name, oldValue, newValue) {
-    console.log("Attribute change");
+    console.log(`Attribute ${name} change to ${newValue}`);
     this.#valueCallbacks[name]?.forEach((callback) => {
       callback(oldValue, newValue);
     });
