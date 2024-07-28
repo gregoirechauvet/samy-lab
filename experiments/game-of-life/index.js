@@ -1,3 +1,5 @@
+import { CanvasComponent } from "/experiments/CanvasComponent.js";
+
 /**
  * @readonly
  * @enum {number}
@@ -47,7 +49,7 @@ class GameOfLifeCore {
       [1, 1],
     ];
 
-    const newGrid = this.grid.map((row, rowIndex) => {
+    this.grid = this.grid.map((row, rowIndex) => {
       return row.map((cell, cellIndex) => {
         const neighborsCount = neighborsOffsets
           .map(([offsetX, offsetY]) => {
@@ -67,8 +69,6 @@ class GameOfLifeCore {
         return CellState.Dead;
       });
     });
-
-    this.grid = newGrid;
   }
 
   /**
@@ -81,49 +81,59 @@ class GameOfLifeCore {
   }
 }
 
-class GameOfLife extends HTMLCanvasElement {
-  /** @type {number | null} */
-  #animationRef = null;
-  /** @type {ResizeObserver | null} */
-  #resizeObserver = null;
+class GameOfLife extends CanvasComponent {
+  /** @type {string[]} */
+  static observedAttributes = ["cell-size", "initial-fill-ratio"];
 
   /**
    * @return {void}
    */
   connectedCallback() {
-    this.#resizeObserver = new ResizeObserver(([canvas]) => {
-      this.#resizeObserver?.unobserve(this);
+    /** @type {GameOfLifeCore | null} */
+    let gameOfLife = null;
+    /** @type {() => void | null} */
+    let draw = null;
 
-      const [boxSize] = canvas.devicePixelContentBoxSize;
+    const init = () => {
+      console.log("init");
+      const resizeObserver = new ResizeObserver(([canvas]) => {
+        resizeObserver.unobserve(this);
 
-      const width = boxSize.inlineSize;
-      const height = boxSize.blockSize;
+        const [boxSize] = canvas.devicePixelContentBoxSize;
 
-      this.width = width;
-      this.height = height;
+        const width = boxSize.inlineSize;
+        const height = boxSize.blockSize;
 
-      const { gameOfLife, draw } = this.initGameOfLife(width, height);
+        this.width = width;
+        this.height = height;
 
-      const loop = () => {
-        gameOfLife.tick();
-        draw();
-        this.#animationRef = window.requestAnimationFrame(loop);
-      };
+        const initState = this.initGameOfLife(width, height);
+        gameOfLife = initState.gameOfLife;
+        draw = initState.draw;
+      });
 
-      this.#animationRef = window.requestAnimationFrame(loop);
-    });
+      resizeObserver.observe(this, { box: "device-pixel-content-box" });
+    };
 
-    this.#resizeObserver.observe(this, { box: "device-pixel-content-box" });
+    this.addValueListener("height", init);
+    this.addValueListener("width", init);
+    this.addValueListener("cell-size", init);
+    this.addValueListener("initial-fill-ratio", init);
+    init();
+
+    let animationFrameRequest;
+    const loop = () => {
+      gameOfLife?.tick();
+      draw?.();
+      animationFrameRequest = window.requestAnimationFrame(loop);
+    };
+
+    animationFrameRequest = window.requestAnimationFrame(loop);
+    this.onDisconnect(() => cancelAnimationFrame(animationFrameRequest));
   }
 
-  /**
-   * @return {void}
-   */
-  disconnectedCallback() {
-    this.#resizeObserver?.disconnect();
-    if (this.#animationRef !== null) {
-      cancelAnimationFrame(this.#animationRef);
-    }
+  attributeChangedCallback(name, oldValue, newValue) {
+    super.attributeChangedCallback(name, oldValue, newValue);
   }
 
   /**
