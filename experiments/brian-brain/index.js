@@ -46,7 +46,7 @@ class BrianBrain extends CanvasComponent {
    * @return {Promise<void>}
    */
   async connectedCallback() {
-    const cellSize = this.cellSize;
+    const cellSize = Math.floor(this.cellSize * devicePixelRatio);
     const initialFillRatio = this.initialFillRatio;
 
     const { width, height } = await this.getCanvasBox();
