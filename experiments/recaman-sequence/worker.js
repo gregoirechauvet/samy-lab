@@ -72,9 +72,9 @@ function computeRecamanValues(width, height, scale) {
  * @param {OffscreenCanvas} canvas
  * @param {number} scale
  * @param {number[]} values
- * @return {void}
+ * @return {() => void}
  */
-function draw(canvas, scale, values) {
+function initDraw(canvas, scale, values) {
   const context = canvas.getContext("2d");
   if (context === null) {
     throw new Error("cannot init context for rendering");
@@ -86,19 +86,64 @@ function draw(canvas, scale, values) {
   let currentX = 0;
   const currentY = height / 2;
 
-  values.forEach((value, count) => {
-    const startAngle = count % 2 === 0 ? Math.PI : 0;
-    const endAngle = count % 2 === 0 ? 2 * Math.PI : Math.PI;
+  const tickSize = 0.8;
 
-    const radius = (value - currentX) / 2;
-    const center = currentX + radius;
+  /**
+   * @param {OffscreenCanvasRenderingContext2D} context
+   * @returns {Generator<*, void, *>}
+   */
+  function* drawStep(context) {
+    const hueSpeed = 0.1;
+    let iterationCount = 0;
 
-    context.beginPath();
-    context.arc(center * scale, currentY, scale * Math.abs(radius), startAngle, endAngle);
-    context.stroke();
+    for (let i = 0; i < values.length; i++) {
+      const value = values[i];
 
-    currentX = value;
-  });
+      const isOdd = i % 2 === 0;
+      let startAngle = isOdd ? Math.PI : 0;
+      let endAngle = isOdd ? 2 * Math.PI : Math.PI;
+
+      const isForward = value > currentX;
+      const shouldBeReversed = (!isOdd && isForward) || (isOdd && !isForward);
+      if (shouldBeReversed) {
+        [startAngle, endAngle] = [endAngle, startAngle];
+      }
+
+      const radius = (value - currentX) / 2;
+      const center = currentX + radius;
+
+      const arcSize = Math.abs(radius) * Math.PI;
+      const parts = arcSize / tickSize;
+
+      const angleStep = (endAngle - startAngle) / parts;
+      for (let j = 0; j < parts; j++) {
+        // TODO: maybe do not account for j iterations in the hue shift, as it gets longer and longer the further it goes and might not be too aesthetic
+        // and probably have constant hue shift per arc
+        const hue = (iterationCount * hueSpeed) % 360;
+        iterationCount++;
+
+        context.strokeStyle = `hsl(${hue}, 75%, 50%)`;
+        context.beginPath();
+        context.arc(
+          center * scale,
+          currentY,
+          scale * Math.abs(radius),
+          j * angleStep + startAngle,
+          (j + 1) * angleStep + startAngle,
+          shouldBeReversed,
+        );
+        context.stroke();
+        yield;
+      }
+
+      currentX = value;
+    }
+  }
+
+  const seq = drawStep(context);
+  return () => {
+    seq.next();
+  };
 }
 
 /**
@@ -108,5 +153,25 @@ function draw(canvas, scale, values) {
 onmessage = (event) => {
   const { canvas, scale } = event.data;
   const values = computeRecamanValues(canvas.width, canvas.height, scale);
-  draw(canvas, scale, values);
+  const draw = initDraw(canvas, scale, values);
+
+  /** @type {number} */
+  let requestId;
+  let previousTime = 0;
+
+  /**
+   * @param {number} time
+   */
+  const render = (time) => {
+    if (time - previousTime < 20) {
+      requestId = requestAnimationFrame(render);
+      return;
+    }
+
+    draw();
+    previousTime = time;
+    requestId = requestAnimationFrame(render);
+  };
+
+  requestId = requestAnimationFrame(render);
 };
