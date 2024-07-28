@@ -83,12 +83,19 @@ class GameOfLifeCore {
 
 class GameOfLife extends CanvasComponent {
   /** @type {string[]} */
-  static observedAttributes = ["cell-size", "initial-fill-ratio"];
+  static observedAttributes = ["height", "width", "cell-size", "initial-fill-ratio"];
+
+  constructor() {
+    super();
+  }
 
   /**
    * @return {void}
    */
   connectedCallback() {
+    super.connectedCallback();
+    this.style.display = "block";
+
     /** @type {GameOfLifeCore | null} */
     let gameOfLife = null;
     /** @type {() => void | null} */
@@ -104,15 +111,15 @@ class GameOfLife extends CanvasComponent {
         const width = boxSize.inlineSize;
         const height = boxSize.blockSize;
 
-        this.width = width;
-        this.height = height;
+        this.canvas.width = width;
+        this.canvas.height = height;
 
         const initState = this.initGameOfLife(width, height);
         gameOfLife = initState.gameOfLife;
         draw = initState.draw;
       });
 
-      resizeObserver.observe(this, { box: "device-pixel-content-box" });
+      resizeObserver.observe(this.canvas, { box: "device-pixel-content-box" });
     };
 
     this.addValueListener("height", init);
@@ -165,7 +172,7 @@ class GameOfLife extends CanvasComponent {
    * @return {() => void}
    */
   initDraw(gameOfLife, width, height, cellSize) {
-    const context = this.getContext("2d");
+    const context = this.canvas.getContext("2d");
     if (context === null) {
       throw new Error("cannot init context for rendering");
     }
@@ -190,4 +197,4 @@ class GameOfLife extends CanvasComponent {
   }
 }
 
-customElements.define("game-of-life", GameOfLife, { extends: "canvas" });
+customElements.define("game-of-life", GameOfLife);

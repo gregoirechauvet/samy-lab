@@ -1,8 +1,25 @@
-export class CanvasComponent extends HTMLCanvasElement {
+export class CanvasComponent extends HTMLElement {
   /** @type {(() => void)[]} */
   #disconnectCallbacks = [];
   /** @type {{[key: string]: ((oldValue: string, newValue: string) => void)[]}} */
   #valueCallbacks = {};
+  /** @type {HTMLCanvasElement} */
+  canvas;
+
+  constructor() {
+    const root = super();
+    this.canvas = document.createElement("canvas");
+
+    root.attachShadow({ mode: "open" }).append(this.canvas);
+  }
+
+  /**
+   * @return {void}
+   */
+  // connectedCallback() {
+  //   const shadow = this.attachShadow({ mode: "open" });
+  //   shadow.append(this.canvas);
+  // }
 
   /**
    * @param {() => void} callback
